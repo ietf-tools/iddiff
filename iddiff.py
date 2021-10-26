@@ -48,7 +48,11 @@ def main():
         .diff_add {background-color:#aaffaa}
         .diff_chg {background-color:#ffff77}
         .diff_sub {background-color:#ffaaaa}"""
-    diff = html_diff.make_file(id_a_lines, id_b_lines, context=True)
+    diff = html_diff.make_file(
+            id_a_lines,
+            id_b_lines,
+            fromdesc=file1,
+            todesc=file2)
 
     stdout.writelines(diff)
 
