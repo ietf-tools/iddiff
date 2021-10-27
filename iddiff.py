@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 from difflib import _mdiff as mdiff
+from html import escape
 from re import compile
 from string import whitespace
 from sys import stdout
@@ -35,11 +36,18 @@ HTML = """
       .delete {{ background-color: #ACF; }}
       .insert {{ background-color: #8FF; }}
       .change {{ background-color: gray; }}
+      .header {{ background-color: orange; }}
     </style>
   </head>
   <body>
     <table cellspacing="0" cellpadding="0">
-     {rows}
+      <tr>
+        <td>&nbsp;</td>
+        <th class="header">{filename1}</th>
+        <td>&nbsp;</td>
+        <th class="header">{filename2}</th>
+      </tr>
+      {rows}
     </table>
   </body>
 </html>"""
@@ -133,7 +141,8 @@ def add_span(line, css_class):
     if len(stripped_line) == 0:
         return ''
     else:
-        return line.replace('\0+', '<span class="{}">'.format(css_class)). \
+        return escape(line). \
+                    replace('\0+', '<span class="{}">'.format(css_class)). \
                     replace('\0-', '<span class="{}">'.format(css_class)). \
                     replace('\0^', '<span class="{}">'.format(css_class)). \
                     replace('\1', '</span>')
@@ -167,14 +176,19 @@ def main():
         if not lb or not rb:
             rows += CONTEXT_LINE
         elif not different:
-            rows += UNCHANGED_ROW.format(lline=lb[1], rline=rb[1])
+            rows += UNCHANGED_ROW.format(
+                                    lline=escape(lb[1]),
+                                    rline=escape(rb[1]))
         else:
             lline = add_span(lb[1], 'delete')
             rline = add_span(rb[1], 'insert')
             if len(lline) > 0 or len(rline) > 0:
                 rows += CHANGED_ROW.format(lline=lline, rline=rline)
     rows.replace('\t', '&nbsp;')
-    stdout.writelines(HTML.format(rows=rows))
+    stdout.writelines(HTML.format(
+                            rows=rows,
+                            filename1=escape(file1),
+                            filename2=escape(file2)))
 
 
 if __name__ == '__main__':
