@@ -75,11 +75,19 @@ CONTEXT_LINE = """
         <td>&nbsp;</td>
         <td class="right">&nbsp;</td>
       </tr>
-      <tr>
+      <tr id="context-{context}">
         <td></td>
-        <th class="change"><small>Skipping</small></th>
+        <th class="change">
+          <a href="#context-{context}">
+           <small>Skipping</small>
+          </a>
+        </th>
         <td></td>
-        <th class="change"><small>Skipping</small></th>
+        <th class="change">
+          <a href="#context-{context}">
+           <small>Skipping</small>
+          </a>
+        </th>
       </tr>"""
 
 WHITESPACES = ''.join([
@@ -172,9 +180,11 @@ def main():
 
     rows = ''
     diffs = mdiff(id_a_lines, id_b_lines, context=context_lines)
+    contexts = 0
     for lb, rb, different in diffs:
         if not lb or not rb:
-            rows += CONTEXT_LINE
+            rows += CONTEXT_LINE.format(context=contexts)
+            contexts += 1
         elif not different:
             rows += UNCHANGED_ROW.format(
                                     lline=escape(lb[1]),
