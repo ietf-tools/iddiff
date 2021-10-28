@@ -5,6 +5,8 @@ from re import compile
 from string import whitespace
 from sys import stdout
 
+VERSION = '0.0.1'
+
 SKIPS = [
     compile(r'^.*\[?[Pp]age [0-9ivx]+\]?[ \t\f]*$'),
     compile(r'^ *Internet.Draft.+[12][0-9][0-9][0-9] *$'),
@@ -157,13 +159,15 @@ def add_span(line, css_class):
 
 
 def main():
-    parser = ArgumentParser(description='ID Diff')
+    parser = ArgumentParser(description='Internet-Draft diff tool')
     parser.add_argument('-c', '--context', action='store_true', default=False,
-                        help='Produce a context')
+                        help='produce a context (default)')
     parser.add_argument('-l', '--lines', type=int, default=8,
-                        help='Set number of context lines (default 8)')
+                        help='set number of context lines (default 8)')
     parser.add_argument('file1')
     parser.add_argument('file2')
+    parser.add_argument('--version', action='version',
+                        version='iddiff {}'.format(VERSION))
     options = parser.parse_args()
 
     file1 = options.file1
