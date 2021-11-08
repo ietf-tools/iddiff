@@ -5,7 +5,7 @@ from re import compile
 from string import whitespace
 from sys import exit, stderr, stdout
 
-VERSION = '0.0.1'
+VERSION = '0.0.2'
 
 SKIPS = [
     compile(r'^.*\[?[Pp]age [0-9ivx]+\]?[ \t\f]*$'),
