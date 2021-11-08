@@ -3,7 +3,7 @@ from difflib import _mdiff as mdiff
 from html import escape
 from re import compile
 from string import whitespace
-from sys import stdout
+from sys import exit, stderr, stdout
 
 VERSION = '0.0.1'
 
@@ -182,10 +182,14 @@ def main():
     else:
         context_lines = None
 
-    with open(file1, 'r') as file:
-        id_a_lines = cleanup(file.readlines())
-    with open(file2, 'r') as file:
-        id_b_lines = cleanup(file.readlines())
+    try:
+        with open(file1, 'r') as file:
+            id_a_lines = cleanup(file.readlines())
+        with open(file2, 'r') as file:
+            id_b_lines = cleanup(file.readlines())
+    except FileNotFoundError as e:
+        stderr.write('iddiff: {}.\n'.format(e))
+        exit(2)
 
     rows = ''
     diffs = mdiff(id_a_lines, id_b_lines, context=context_lines)
