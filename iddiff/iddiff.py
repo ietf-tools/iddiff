@@ -15,6 +15,17 @@ SKIPS = [
     compile(r'^RFC[ -]?[0-9]+.*(  +).* [12][0-9][0-9][0-9]$'),
     compile(r'^draft-[-a-z0-9_.]+.*[0-9][0-9][0-9][0-9]$')]
 
+TABLE = """
+    <table cellspacing="0" cellpadding="0">
+      <tr>
+        <td>&nbsp;</td>
+        <th class="header">{filename1}</th>
+        <td>&nbsp;</td>
+        <th class="header">{filename2}</th>
+      </tr>
+      {rows}
+    </table>"""
+
 HTML = """
 <!DOCTYPE html>
 <html lang="en">
@@ -42,15 +53,7 @@ HTML = """
     </style>
   </head>
   <body>
-    <table cellspacing="0" cellpadding="0">
-      <tr>
-        <td>&nbsp;</td>
-        <th class="header">{filename1}</th>
-        <td>&nbsp;</td>
-        <th class="header">{filename2}</th>
-      </tr>
-      {rows}
-    </table>
+    {table}
   </body>
 </html>"""
 
@@ -160,6 +163,8 @@ def add_span(line, css_class):
 
 def main():
     parser = ArgumentParser(description='Internet-Draft diff tool')
+    parser.add_argument('-t', '--table', action='store_true', default=False,
+                        help='produce a HTML table (default)')
     parser.add_argument('-c', '--context', action='store_true', default=False,
                         help='produce a context (default)')
     parser.add_argument('-l', '--lines', type=int, default=8,
@@ -199,10 +204,15 @@ def main():
             if len(lline) > 0 or len(rline) > 0:
                 rows += CHANGED_ROW.format(lline=lline, rline=rline)
     rows.replace('\t', '&nbsp;')
-    stdout.writelines(HTML.format(
-                            rows=rows,
-                            filename1=escape(file1),
-                            filename2=escape(file2)))
+
+    table = TABLE.format(rows=rows,
+                         filename1=escape(file1),
+                         filename2=escape(file2))
+
+    if options.table:
+        stdout.writelines(table)
+    else:
+        stdout.writelines(HTML.format(table=table))
 
 
 if __name__ == '__main__':

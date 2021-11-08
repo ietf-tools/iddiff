@@ -12,7 +12,7 @@ pip install iddiff
 
 ## Usage
 ```
-usage: iddiff [-h] [-c] [-l LINES] [--version] file1 file2
+usage: iddiff.py [-h] [-t] [-c] [-l LINES] [--version] file1 file2
 
 Internet-Draft diff tool
 
@@ -22,6 +22,7 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
+  -t, --table           produce a HTML table (default)
   -c, --context         produce a context (default)
   -l LINES, --lines LINES
                         set number of context lines (default 8)
