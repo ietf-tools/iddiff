@@ -28,3 +28,14 @@ optional arguments:
                         set number of context lines (default 8)
   --version             show program's version number and exit
 ```
+
+## Tests
+
+Run tests and generate the coverage report.
+
+```
+pip install -r requirements.dev.txt
+pyflakes iddiff tests
+coverage run -m unittest discover tests
+coverage report
+```
