@@ -28,3 +28,15 @@ optional arguments:
                         set number of context lines (default 8)
   --version             show program's version number and exit
 ```
+
+## Tests
+
+Run tests with [tox](https://tox.wiki/).
+```
+tox
+```
+
+Generate coverage report with [coverage](https://github.com/nedbat/coveragepy).
+```
+coverage report
+```

@@ -131,6 +131,10 @@ WHITESPACES = ''.join([
 
 
 def cleanup(lines):
+    '''Removes kippable content, shrinks multiple empty lines
+    If a link only contains WHITESPACES,
+    that line will get stripped of any WHITESPACES.'''
+
     id_lines = []
     previous_blank = False
     for line in lines:
@@ -150,6 +154,7 @@ def cleanup(lines):
 
 
 def add_span(line, css_class):
+    '''Add span tag with the class'''
     stripped_line = line.strip('\0+-^\1').strip(WHITESPACES)
     if len(stripped_line) == 0:
         return ''
@@ -161,38 +166,10 @@ def add_span(line, css_class):
                     replace('\1', '</span>')
 
 
-def main():
-    parser = ArgumentParser(description='Internet-Draft diff tool')
-    parser.add_argument('-t', '--table', action='store_true', default=False,
-                        help='produce a HTML table (default)')
-    parser.add_argument('-c', '--context', action='store_true', default=False,
-                        help='produce a context (default)')
-    parser.add_argument('-l', '--lines', type=int, default=8,
-                        help='set number of context lines (default 8)')
-    parser.add_argument('file1')
-    parser.add_argument('file2')
-    parser.add_argument('--version', action='version',
-                        version='iddiff {}'.format(VERSION))
-    options = parser.parse_args()
-
-    file1 = options.file1
-    file2 = options.file2
-    if options.context:
-        context_lines = options.lines
-    else:
-        context_lines = None
-
-    try:
-        with open(file1, 'r') as file:
-            id_a_lines = cleanup(file.readlines())
-        with open(file2, 'r') as file:
-            id_b_lines = cleanup(file.readlines())
-    except FileNotFoundError as e:
-        stderr.write('iddiff: {}.\n'.format(e))
-        exit(2)
-
+def get_diff_rows(first_id_lines, second_id_lines, context):
+    '''Retuns diff rows'''
     rows = ''
-    diffs = mdiff(id_a_lines, id_b_lines, context=context_lines)
+    diffs = mdiff(first_id_lines, second_id_lines, context=context)
     contexts = 0
     for lb, rb, different in diffs:
         if not lb or not rb:
@@ -209,14 +186,66 @@ def main():
                 rows += CHANGED_ROW.format(lline=lline, rline=rline)
     rows.replace('\t', '&nbsp;')
 
-    table = TABLE.format(rows=rows,
-                         filename1=escape(file1),
-                         filename2=escape(file2))
+    return rows
 
-    if options.table:
-        stdout.writelines(table)
+
+def get_html_table(filename1, filename2, rows):
+    '''Return HTML table'''
+    return TABLE.format(filename1=escape(filename1),
+                        filename2=escape(filename2),
+                        rows=rows)
+
+
+def get_iddiff(file1, file2, context_lines, table_only):
+    '''Return iddiff output'''
+
+    with open(file1, 'r') as file:
+        id_a_lines = cleanup(file.readlines())
+    with open(file2, 'r') as file:
+        id_b_lines = cleanup(file.readlines())
+
+    rows = get_diff_rows(id_a_lines, id_b_lines, context_lines)
+
+    output = get_html_table(file1, file2, rows)
+
+    if not table_only:
+        output = HTML.format(table=output)
+
+    return output
+
+
+def parse_args(args=None):
+    '''Parse command line arguments and return options'''
+    parser = ArgumentParser(description='Internet-Draft diff tool')
+    parser.add_argument('-t', '--table', action='store_true', default=False,
+                        help='produce a HTML table (default)')
+    parser.add_argument('-c', '--context', action='store_true', default=False,
+                        help='produce a context (default)')
+    parser.add_argument('-l', '--lines', type=int, default=8,
+                        help='set number of context lines (default 8)')
+    parser.add_argument('file1')
+    parser.add_argument('file2')
+    parser.add_argument('--version', action='version',
+                        version='iddiff {}'.format(VERSION))
+    return parser.parse_args(args)
+
+
+def main():
+    options = parse_args()
+
+    file1 = options.file1
+    file2 = options.file2
+    if options.context:
+        context_lines = options.lines
     else:
-        stdout.writelines(HTML.format(table=table))
+        context_lines = None
+
+    try:
+        iddiff = get_iddiff(file1, file2, context_lines, options.table)
+        stdout.writelines(iddiff)
+    except FileNotFoundError as e:
+        stderr.write('iddiff: {}.\n'.format(e))
+        exit(2)
 
 
 if __name__ == '__main__':
