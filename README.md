@@ -31,11 +31,12 @@ optional arguments:
 
 ## Tests
 
-Run tests and generate the coverage report.
-
+Run tests with [tox](https://tox.wiki/).
 ```
-pip install -r requirements.dev.txt
-pyflakes iddiff tests
-coverage run -m unittest discover tests
+tox
+```
+
+Generate coverage report with [coverage](https://github.com/nedbat/coveragepy).
+```
 coverage report
 ```
