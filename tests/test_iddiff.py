@@ -5,8 +5,8 @@ from unittest.mock import patch
 import sys
 
 from iddiff.iddiff import (
-        add_span, cleanup, get_diff_rows, get_html_table, get_iddiff, main,
-        parse_args)
+        add_span, cleanup, get_diff_rows, get_html_table, get_iddiff,
+        get_wdiff, main, parse_args)
 
 HEADERS_AND_FOOTERS = """
 Crocker                                                        [Page 5]
@@ -111,6 +111,20 @@ class TestIddiff(TestCase):
         self.assertNotIn(LINES_A[0], output)
         self.assertNotIn(LINES_A[1], output)
 
+    def test_get_wdiff(self):
+        lines_a = ''.join(LINES_A)
+        lines_b = ''.join([
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit,',
+            'sed do eiusmod incididunt ut labore et dolore magna',
+            'aliqua. Ut enim add minim veniam, quis nostrud exercitation',
+            'ullamco laboris nisi ut aliquip ex ea commodo consequat.'])
+
+        output = get_wdiff(lines_a, lines_b)
+
+        self.assertIn(LINES_A[0], output)
+        self.assertIn('<span class="w-delete">', output)
+        self.assertIn('<span class="w-insert">', output)
+
     def test_get_html_table(self):
         rows = get_diff_rows(LINES_A, LINES_B, context=None)
         table = get_html_table(filename1='foo',
@@ -172,6 +186,16 @@ class TestIddiff(TestCase):
         self.assertIn('<html', output)
         self.assertIn('<table', output)
         self.assertIn('>Skipping<', output)
+        self.assertTrue(output.strip().endswith('</html>'))
+
+    def test_wdiff(self):
+        output = get_iddiff(FILE_1, FILE_2, wdiff=True)
+
+        self.assertIn('<html', output)
+        self.assertIn('<pre', output)
+        self.assertIn('class="w-delete"', output)
+        self.assertIn('class="w-insert"', output)
+        self.assertNotIn('<table', output)
         self.assertTrue(output.strip().endswith('</html>'))
 
     def test_iddiff_file_error(self):
