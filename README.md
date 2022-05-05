@@ -12,7 +12,7 @@ pip install iddiff
 
 ## Usage
 ```
-usage: iddiff.py [-h] [-t] [-c] [-l LINES] [--version] file1 file2
+usage: iddiff.py [-h] [-t] [-c] [-l LINES] [-w] [--version] file1 file2
 
 Internet-Draft diff tool
 
@@ -26,6 +26,7 @@ optional arguments:
   -c, --context         produce a context (default)
   -l LINES, --lines LINES
                         set number of context lines (default 8)
+  -w, --wdiff           produce word difference
   --version             show program's version number and exit
 ```
 
