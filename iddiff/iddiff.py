@@ -138,16 +138,29 @@ WHITESPACES = ''.join([
     '\uFEFF'])   # zero width non-breaking space
 
 
-def cleanup(lines):
+def cleanup(lines, skip_whitespaces):
     '''Removes skippable content, shrinks multiple empty lines
     If a link only contains WHITESPACES,
     that line will get stripped of any WHITESPACES.'''
 
     id_lines = []
-    previous_blank = False
-    for line in lines:
-        if len(line.strip(WHITESPACES)) > 0:
-            previous_blank = False
+    if skip_whitespaces:
+        previous_blank = False
+        for line in lines:
+            if len(line.strip(WHITESPACES)) > 0:
+                previous_blank = False
+                keep = True
+                for skip in SKIPS:
+                    if skip.match(line):
+                        keep = False
+                        break
+                if keep:
+                    id_lines.append(line)
+            elif not previous_blank:
+                id_lines.append(line.strip(WHITESPACES))
+                previous_blank = True
+    else:
+        for line in lines:
             keep = True
             for skip in SKIPS:
                 if skip.match(line):
@@ -155,9 +168,6 @@ def cleanup(lines):
                     break
             if keep:
                 id_lines.append(line)
-        elif not previous_blank:
-            id_lines.append(line.strip(WHITESPACES))
-            previous_blank = True
     return id_lines
 
 
@@ -230,21 +240,21 @@ def get_html_table(filename1, filename2, rows):
 
 
 def get_iddiff(file1, file2, context_lines=None, table_only=False,
-               wdiff=False):
+               wdiff=False, skip_whitespaces=False):
     '''Return iddiff output'''
 
     if wdiff:
         with open(file1, 'r') as file:
-            id_a_lines = ''.join(cleanup(file.readlines()))
+            id_a_lines = ''.join(cleanup(file.readlines(), skip_whitespaces))
         with open(file2, 'r') as file:
-            id_b_lines = ''.join(cleanup(file.readlines()))
+            id_b_lines = ''.join(cleanup(file.readlines(), skip_whitespaces))
 
         output = get_wdiff(id_a_lines, id_b_lines)
     else:
         with open(file1, 'r') as file:
-            id_a_lines = cleanup(file.readlines())
+            id_a_lines = cleanup(file.readlines(), skip_whitespaces)
         with open(file2, 'r') as file:
-            id_b_lines = cleanup(file.readlines())
+            id_b_lines = cleanup(file.readlines(), skip_whitespaces)
 
         rows = get_diff_rows(id_a_lines, id_b_lines, context_lines)
 
@@ -267,6 +277,9 @@ def parse_args(args=None):
                         help='set number of context lines (default 8)')
     parser.add_argument('-w', '--wdiff', action='store_true', default=False,
                         help='produce word difference')
+    parser.add_argument('-s', '--skip-whitespaces', action='store_true',
+                        default=False,
+                        help='skip multilines with only whitespaces')
     parser.add_argument('file1')
     parser.add_argument('file2')
     parser.add_argument('--version', action='version',
@@ -289,7 +302,8 @@ def main():
                             file2=file2,
                             context_lines=context_lines,
                             table_only=options.table,
-                            wdiff=options.wdiff)
+                            wdiff=options.wdiff,
+                            skip_whitespaces=options.skip_whitespaces)
         stdout.writelines(iddiff)
     except FileNotFoundError as e:
         stderr.write('iddiff: {}.\n'.format(e))
