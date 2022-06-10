@@ -38,15 +38,25 @@ class TestIddiff(TestCase):
     def test_cleanup_shrink_empty_lines(self):
         lines = [' ', '', '\u0009', '\u2009\u200A ']
 
-        output = cleanup(lines)
+        output = cleanup(lines, skip_whitespaces=True)
 
         self.assertEqual(len(output), 1)
         self.assertEqual(output[0], '')
 
-    def test_cleanup_skippable_content(self):
-        output = cleanup(HEADERS_AND_FOOTERS)
+    def test_cleanup_keep_empty_lines(self):
+        lines = [' ', '', '\u0009', '\u2009\u200A ']
 
-        self.assertEqual(len(output), 0)
+        output = cleanup(lines, skip_whitespaces=False)
+
+        self.assertEqual(len(output), 4)
+        for line in lines:
+            self.assertIn(line, output)
+
+    def test_cleanup_skippable_content(self):
+        for skip_whitespaces in (True, False):
+            output = cleanup(HEADERS_AND_FOOTERS, skip_whitespaces)
+
+            self.assertEqual(len(output), 0)
 
     def test_cleanup_non_skippable_content(self):
         non_skippable = [
@@ -55,12 +65,14 @@ class TestIddiff(TestCase):
             'aliqua. Ut enim ad minim veniam, quis nostrud exercitation  ',
             'ullamco laboris nisi ut aliquip ex ea commodo consequat.    ']
 
-        output = cleanup(HEADERS_AND_FOOTERS + non_skippable)
+        for skip_whitespaces in (True, False):
+            output = cleanup(HEADERS_AND_FOOTERS + non_skippable,
+                             skip_whitespaces)
 
-        self.assertEqual(len(output), len(non_skippable))
+            self.assertEqual(len(output), len(non_skippable))
 
-        for line in non_skippable:
-            self.assertIn(line, output)
+            for line in non_skippable:
+                self.assertIn(line, output)
 
     def test_add_span(self):
         lines = [
