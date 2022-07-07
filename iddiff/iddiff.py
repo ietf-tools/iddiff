@@ -16,14 +16,15 @@ SKIPS = [
     compile(r'^draft-[-a-z0-9_.]+.*[0-9][0-9][0-9][0-9]$')]
 
 TABLE = """
-    <table cellspacing="0" cellpadding="0">
-      <tr>
-        <td>&nbsp;</td>
-        <th class="header">{filename1}</th>
-        <td>&nbsp;</td>
-        <th class="header">{filename2}</th>
-      </tr>
-      {rows}
+    <table>
+      <tbody>
+        <tr>
+          <td>&nbsp;</td>
+          <th class="header" scope="col">{filename1}</th>
+          <td>&nbsp;</td>
+          <th class="header" scope="col">{filename2}</th>
+        </tr>{rows}
+      </tbody>
     </table>"""
 
 HTML = """
@@ -31,15 +32,20 @@ HTML = """
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title></title>
+    <title>{title}</title>
     <style>
       body {{font-family: monospace}}
+      table {{
+        border-spacing: 0;
+      }}
       td {{
+        padding: 0;
         white-space: pre;
         vertical-align: top;
         font-size: 0.86em;
       }}
       th {{
+        padding: 0;
         text-align: center;
       }}
       .left {{ background-color: #EEE; }}
@@ -60,9 +66,7 @@ HTML = """
       }}
     </style>
   </head>
-  <body>
-    {output}
-  </body>
+  <body>{output}</body>
 </html>"""
 
 UNCHANGED_ROW = """
@@ -192,21 +196,21 @@ def get_wdiff(first_id_lines, second_id_lines):
                           b=second_id_lines)
     for tag, f1, f2, s1, s2 in seq.get_opcodes():
         if tag == 'equal':
-            rows += first_id_lines[f1:f2]
+            rows += escape(first_id_lines[f1:f2])
         elif tag == 'delete':
             rows += '<span class="w-delete">{}</span>'.format(
-                        first_id_lines[f1:f2])
+                        escape(first_id_lines[f1:f2]))
         elif tag == 'replace':
             rows += '<span class="w-delete">{}</span>'.format(
-                        first_id_lines[f1:f2])
+                        escape(first_id_lines[f1:f2]))
             rows += '<span class="w-insert">{}</span>'.format(
-                        second_id_lines[s1:s2])
+                        escape(second_id_lines[s1:s2]))
         elif tag == 'insert':
             rows += '<span class="w-insert">{}</span>'.format(
-                        second_id_lines[s1:s2])
+                        escape(second_id_lines[s1:s2]))
     output = '<pre>{}</pre>'.format(rows)
 
-    return HTML.format(output=output)
+    return output
 
 
 def get_diff_rows(first_id_lines, second_id_lines, context):
@@ -243,6 +247,10 @@ def get_iddiff(file1, file2, context_lines=None, table_only=False,
                wdiff=False, skip_whitespaces=False):
     '''Return iddiff output'''
 
+    title = 'Diff: {file1} - {file2}'.format(
+                                        file1=escape(file1),
+                                        file2=escape(file2))
+
     if wdiff:
         with open(file1, 'r') as file:
             id_a_lines = ''.join(cleanup(file.readlines(), skip_whitespaces))
@@ -250,6 +258,8 @@ def get_iddiff(file1, file2, context_lines=None, table_only=False,
             id_b_lines = ''.join(cleanup(file.readlines(), skip_whitespaces))
 
         output = get_wdiff(id_a_lines, id_b_lines)
+
+        output = HTML.format(output=output, title=title)
     else:
         with open(file1, 'r') as file:
             id_a_lines = cleanup(file.readlines(), skip_whitespaces)
@@ -261,7 +271,7 @@ def get_iddiff(file1, file2, context_lines=None, table_only=False,
         output = get_html_table(file1, file2, rows)
 
         if not table_only:
-            output = HTML.format(output=output)
+            output = HTML.format(output=output, title=title)
 
     return output
 
