@@ -43,7 +43,7 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: 'generate report'
+      - name: Generate report
         run: |
           pip install -r requirements.dev.txt
           coverage run -m unittest discover tests
@@ -53,6 +53,39 @@ jobs:
         with:
           flags: unittests
           fail_ci_if_error: true
+
+  validate-html-output:
+    name: Validate HTML output
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@master
+        with:
+          python-version: 3.9
+
+      - name: Install HTML validator
+        run:
+          npm install html-validate
+
+      - name: Download two drafts
+        run: |
+          wget https://www.ietf.org/archive/id/draft-iab-xml2rfcv2-01.txt
+          wget https://www.ietf.org/archive/id/draft-iab-xml2rfcv2-02.txt
+
+      - name: Generate HTML outputs
+        run: |
+          python iddiff/iddiff.py draft-iab-xml2rfcv2-01.txt draft-iab-xml2rfcv2-02.txt > iddiff.html
+          python iddiff/iddiff.py -w draft-iab-xml2rfcv2-01.txt draft-iab-xml2rfcv2-02.txt > wdiff.html
+
+      - name: Validate iddiff HTML output
+        run: npm exec html-validate iddiff.html
+
+      - name: Validate iddiff wdiff HTML output
+        run: npm exec html-validate wdiff.html
 
   tests-linux:
     name: Unit Tests (Linux)
