@@ -38,7 +38,7 @@ class TestIddiff(TestCase):
     def test_cleanup_shrink_empty_lines(self):
         lines = [' ', '', '\u0009', '\u2009\u200A ']
 
-        output = cleanup(lines, skip_whitespaces=True)
+        output = cleanup(lines, skip_whitespace=True)
 
         self.assertEqual(len(output), 1)
         self.assertEqual(output[0], '')
@@ -46,15 +46,15 @@ class TestIddiff(TestCase):
     def test_cleanup_keep_empty_lines(self):
         lines = [' ', '', '\u0009', '\u2009\u200A ']
 
-        output = cleanup(lines, skip_whitespaces=False)
+        output = cleanup(lines, skip_whitespace=False)
 
         self.assertEqual(len(output), 4)
         for line in lines:
             self.assertIn(line, output)
 
     def test_cleanup_skippable_content(self):
-        for skip_whitespaces in (True, False):
-            output = cleanup(HEADERS_AND_FOOTERS, skip_whitespaces)
+        for skip_whitespace in (True, False):
+            output = cleanup(HEADERS_AND_FOOTERS, skip_whitespace)
 
             self.assertEqual(len(output), 0)
 
@@ -65,9 +65,9 @@ class TestIddiff(TestCase):
             'aliqua. Ut enim ad minim veniam, quis nostrud exercitation  ',
             'ullamco laboris nisi ut aliquip ex ea commodo consequat.    ']
 
-        for skip_whitespaces in (True, False):
+        for skip_whitespace in (True, False):
             output = cleanup(HEADERS_AND_FOOTERS + non_skippable,
-                             skip_whitespaces)
+                             skip_whitespace)
 
             self.assertEqual(len(output), len(non_skippable))
 
@@ -150,22 +150,16 @@ class TestIddiff(TestCase):
         self.assertIn(LINES_A[0], table)
 
     def test_arg_parse_table(self):
-        self.assertFalse(parse_args(DEFAULT_ARGS).table)
+        self.assertFalse(parse_args(DEFAULT_ARGS).table_only)
 
-        for arg in ['-t', '--table']:
-            self.assertTrue(parse_args(DEFAULT_ARGS + [arg, ]).table)
-
-    def test_arg_parse_context(self):
-        self.assertFalse(parse_args(DEFAULT_ARGS).context)
-
-        for arg in ['-c', '--context']:
-            self.assertTrue(parse_args(DEFAULT_ARGS + [arg, ]).context)
+        for arg in ['-t', '--table-only']:
+            self.assertTrue(parse_args(DEFAULT_ARGS + [arg, ]).table_only)
 
     def test_arg_parse_lines(self):
-        self.assertEqual(parse_args(DEFAULT_ARGS).lines, 8)
+        self.assertEqual(parse_args(DEFAULT_ARGS).context_lines, 8)
 
-        for args in [['-l', '10'], ['--lines', '10']]:
-            self.assertEqual(parse_args(DEFAULT_ARGS + args).lines, 10)
+        for args in [['-c', '10'], ['--context-lines', '10']]:
+            self.assertEqual(parse_args(DEFAULT_ARGS + args).context_lines, 10)
 
     def test_arg_parse_files(self):
         options = parse_args(DEFAULT_ARGS)
@@ -222,7 +216,7 @@ class TestIddiff(TestCase):
 
         self.assertIn('<html', output.getvalue())
         self.assertIn('<table', output.getvalue())
-        self.assertNotIn('>Skipping<', output.getvalue())
+        self.assertIn('>Skipping<', output.getvalue())
         self.assertTrue(output.getvalue().strip().endswith('</html>'))
 
     def test_main_table_only(self):
@@ -232,19 +226,19 @@ class TestIddiff(TestCase):
             main()
 
         self.assertNotIn('<html', output.getvalue())
-        self.assertNotIn('>Skipping<', output.getvalue())
+        self.assertIn('>Skipping<', output.getvalue())
         self.assertTrue(output.getvalue().strip().startswith('<table'))
         self.assertTrue(output.getvalue().strip().endswith('</table>'))
 
-    def test_main_with_context(self):
-        sys.argv = [basename(__file__), '-c', FILE_1, FILE_2]
+    def test_main_with_without_context(self):
+        sys.argv = [basename(__file__), '-c', 0, FILE_1, FILE_2]
         output = StringIO()
         with patch('sys.stdout.writelines', new=output.writelines):
             main()
 
         self.assertIn('<html', output.getvalue())
         self.assertIn('<table', output.getvalue())
-        self.assertIn('>Skipping<', output.getvalue())
+        self.assertNotIn('>Skipping<', output.getvalue())
         self.assertTrue(output.getvalue().strip().endswith('</html>'))
 
     def test_main_file_error(self):

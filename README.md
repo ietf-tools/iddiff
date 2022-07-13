@@ -12,24 +12,29 @@ pip install iddiff
 
 ## Usage
 ```
-usage: iddiff [-h] [-t] [-c] [-l LINES] [-w] [-s] [--version] file1 file2
+usage: iddiff [-h] [--side-by-side | -w] [-t] [-c CONTEXT_LINES] [-s]
+              [--version]
+              file1 file2
 
 Internet-Draft diff tool
 
 positional arguments:
-  file1
-  file2
+  file1                 first file to compare
+  file2                 second file to compare
 
 optional arguments:
   -h, --help            show this help message and exit
-  -t, --table           produce a HTML table (default)
-  -c, --context         produce a context (default)
-  -l LINES, --lines LINES
-                        set number of context lines (default 8)
+  --side-by-side        side by side difference (default)
   -w, --wdiff           produce word difference
-  -s, --skip-whitespaces
-                        skip multilines with only whitespaces
+  -s, --skip-whitespace
+                        skip multilines with only whitespace
   --version             show program's version number and exit
+
+side by side options:
+  -t, --table-only      produce only a HTML table
+  -c CONTEXT_LINES, --context-lines CONTEXT_LINES
+                        set number of context lines (set to 0 for no context)
+                        (default 8)
 ```
 
 ## Tests
