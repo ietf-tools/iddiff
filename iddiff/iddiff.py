@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 from difflib import _mdiff as mdiff, SequenceMatcher
 from html import escape
+from pathlib import Path
 from re import compile
 from string import whitespace
 from sys import exit, stderr, stdout
@@ -142,6 +143,12 @@ WHITESPACE = ''.join([
     '\uFEFF'])   # zero width non-breaking space
 
 
+def get_filename(filename):
+    '''Return HTML escaped filename form user input path'''
+
+    return escape(Path(filename).name)
+
+
 def cleanup(lines, skip_whitespace):
     '''Removes skippable content, shrinks multiple empty lines
     If a link only contains WHITESPACE,
@@ -238,8 +245,8 @@ def get_diff_rows(first_id_lines, second_id_lines, context):
 
 def get_html_table(filename1, filename2, rows):
     '''Return HTML table'''
-    return TABLE.format(filename1=escape(filename1),
-                        filename2=escape(filename2),
+    return TABLE.format(filename1=get_filename(filename1),
+                        filename2=get_filename(filename2),
                         rows=rows)
 
 
@@ -248,8 +255,8 @@ def get_iddiff(file1, file2, context_lines=None, table_only=False,
     '''Return iddiff output'''
 
     title = 'Diff: {file1} - {file2}'.format(
-                                        file1=escape(file1),
-                                        file2=escape(file2))
+                                        file1=get_filename(file1),
+                                        file2=get_filename(file2))
 
     if wdiff:
         with open(file1, 'r') as file:

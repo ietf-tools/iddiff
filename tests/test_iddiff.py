@@ -5,8 +5,8 @@ from unittest.mock import patch
 import sys
 
 from iddiff.iddiff import (
-        add_span, cleanup, get_diff_rows, get_html_table, get_iddiff,
-        get_wdiff, main, parse_args)
+        add_span, cleanup, get_diff_rows, get_filename, get_html_table,
+        get_iddiff, get_wdiff, main, parse_args)
 
 HEADERS_AND_FOOTERS = """
 Crocker                                                        [Page 5]
@@ -250,3 +250,15 @@ class TestIddiff(TestCase):
                 main()
 
         self.assertTrue(output.getvalue().startswith('iddiff:'))
+
+    def test_get_filename(self):
+        PATH_INPUTS = [
+                'foobar.txt',
+                'foobar/foobar.txt',
+                'foo/bar/foobar.txt',
+                '/foo/bar/foobar.txt',
+                '../foo/bar/foobar.txt',
+                './foobar.txt']
+
+        for path in PATH_INPUTS:
+            self.assertEqual(get_filename(path), 'foobar.txt')
