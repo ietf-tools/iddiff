@@ -94,13 +94,13 @@ CONTEXT_LINE = """
       </tr>
       <tr id="context-{context}">
         <td></td>
-        <th class="change">
+        <th class="change" scope="col">
           <a href="#context-{context}">
            <small>Skipping</small>
           </a>
         </th>
         <td></td>
-        <th class="change">
+        <th class="change" scope="col">
           <a href="#context-{context}">
            <small>Skipping</small>
           </a>
