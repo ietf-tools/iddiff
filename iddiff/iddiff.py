@@ -94,20 +94,20 @@ CONTEXT_LINE = """
       </tr>
       <tr id="context-{context}">
         <td></td>
-        <th class="change">
+        <th class="change" scope="col">
           <a href="#context-{context}">
            <small>Skipping</small>
           </a>
         </th>
         <td></td>
-        <th class="change">
+        <th class="change" scope="col">
           <a href="#context-{context}">
            <small>Skipping</small>
           </a>
         </th>
       </tr>"""
 
-WHITESPACES = ''.join([
+WHITESPACE = ''.join([
     whitespace,  # python stirng.whitespace
     '\u0009',    # character tabulation
     '\u000A',    # line feed
@@ -142,16 +142,16 @@ WHITESPACES = ''.join([
     '\uFEFF'])   # zero width non-breaking space
 
 
-def cleanup(lines, skip_whitespaces):
+def cleanup(lines, skip_whitespace):
     '''Removes skippable content, shrinks multiple empty lines
-    If a link only contains WHITESPACES,
-    that line will get stripped of any WHITESPACES.'''
+    If a link only contains WHITESPACE,
+    that line will get stripped of any WHITESPACE.'''
 
     id_lines = []
-    if skip_whitespaces:
+    if skip_whitespace:
         previous_blank = False
         for line in lines:
-            if len(line.strip(WHITESPACES)) > 0:
+            if len(line.strip(WHITESPACE)) > 0:
                 previous_blank = False
                 keep = True
                 for skip in SKIPS:
@@ -161,7 +161,7 @@ def cleanup(lines, skip_whitespaces):
                 if keep:
                     id_lines.append(line)
             elif not previous_blank:
-                id_lines.append(line.strip(WHITESPACES))
+                id_lines.append(line.strip(WHITESPACE))
                 previous_blank = True
     else:
         for line in lines:
@@ -177,7 +177,7 @@ def cleanup(lines, skip_whitespaces):
 
 def add_span(line, css_class):
     '''Add span tag with the class'''
-    stripped_line = line.strip('\0+-^\1').strip(WHITESPACES)
+    stripped_line = line.strip('\0+-^\1').strip(WHITESPACE)
     if len(stripped_line) == 0:
         return ''
     else:
@@ -244,7 +244,7 @@ def get_html_table(filename1, filename2, rows):
 
 
 def get_iddiff(file1, file2, context_lines=None, table_only=False,
-               wdiff=False, skip_whitespaces=False):
+               wdiff=False, skip_whitespace=False):
     '''Return iddiff output'''
 
     title = 'Diff: {file1} - {file2}'.format(
@@ -253,18 +253,18 @@ def get_iddiff(file1, file2, context_lines=None, table_only=False,
 
     if wdiff:
         with open(file1, 'r') as file:
-            id_a_lines = ''.join(cleanup(file.readlines(), skip_whitespaces))
+            id_a_lines = ''.join(cleanup(file.readlines(), skip_whitespace))
         with open(file2, 'r') as file:
-            id_b_lines = ''.join(cleanup(file.readlines(), skip_whitespaces))
+            id_b_lines = ''.join(cleanup(file.readlines(), skip_whitespace))
 
         output = get_wdiff(id_a_lines, id_b_lines)
 
         output = HTML.format(output=output, title=title)
     else:
         with open(file1, 'r') as file:
-            id_a_lines = cleanup(file.readlines(), skip_whitespaces)
+            id_a_lines = cleanup(file.readlines(), skip_whitespace)
         with open(file2, 'r') as file:
-            id_b_lines = cleanup(file.readlines(), skip_whitespaces)
+            id_b_lines = cleanup(file.readlines(), skip_whitespace)
 
         rows = get_diff_rows(id_a_lines, id_b_lines, context_lines)
 
@@ -279,21 +279,39 @@ def get_iddiff(file1, file2, context_lines=None, table_only=False,
 def parse_args(args=None):
     '''Parse command line arguments and return options'''
     parser = ArgumentParser(description='Internet-Draft diff tool')
-    parser.add_argument('-t', '--table', action='store_true', default=False,
-                        help='produce a HTML table (default)')
-    parser.add_argument('-c', '--context', action='store_true', default=False,
-                        help='produce a context (default)')
-    parser.add_argument('-l', '--lines', type=int, default=8,
-                        help='set number of context lines (default 8)')
-    parser.add_argument('-w', '--wdiff', action='store_true', default=False,
-                        help='produce word difference')
-    parser.add_argument('-s', '--skip-whitespaces', action='store_true',
+
+    main_group = parser.add_mutually_exclusive_group()
+    main_group.add_argument('--side-by-side',
+                            action='store_true',
+                            default=True,
+                            help='side by side difference (default)')
+    main_group.add_argument('-w', '--wdiff',
+                            action='store_true',
+                            default=False,
+                            help='produce word difference')
+
+    group = parser.add_argument_group('side by side options')
+    group.add_argument('-t', '--table-only',
+                       action='store_true',
+                       default=False,
+                       help='produce only a HTML table')
+    group.add_argument('-c', '--context-lines',
+                       type=int,
+                       default=8,
+                       help='set number of context lines (set to 0 for no '
+                            'context) (default 8)')
+
+    parser.add_argument('-s', '--skip-whitespace',
+                        action='store_true',
                         default=False,
-                        help='skip multilines with only whitespaces')
-    parser.add_argument('file1')
-    parser.add_argument('file2')
-    parser.add_argument('--version', action='version',
+                        help='skip multilines with only whitespace')
+    parser.add_argument('--version',
+                        action='version',
                         version='iddiff {}'.format(VERSION))
+
+    parser.add_argument('file1', help='first file to compare')
+    parser.add_argument('file2', help='second file to compare')
+
     return parser.parse_args(args)
 
 
@@ -302,18 +320,18 @@ def main():
 
     file1 = options.file1
     file2 = options.file2
-    if options.context:
-        context_lines = options.lines
-    else:
+    if options.context_lines == 0:
         context_lines = None
+    else:
+        context_lines = options.context_lines
 
     try:
         iddiff = get_iddiff(file1=file1,
                             file2=file2,
                             context_lines=context_lines,
-                            table_only=options.table,
+                            table_only=options.table_only,
                             wdiff=options.wdiff,
-                            skip_whitespaces=options.skip_whitespaces)
+                            skip_whitespace=options.skip_whitespace)
         stdout.writelines(iddiff)
     except FileNotFoundError as e:
         stderr.write('iddiff: {}.\n'.format(e))
