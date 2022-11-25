@@ -196,8 +196,8 @@ def add_span(line, css_class):
                     replace('\1', '</span>')
 
 
-def get_wdiff(first_id_lines, second_id_lines):
-    '''Return wdiff'''
+def get_hwdiff(first_id_lines, second_id_lines):
+    '''Return hwdiff'''
     rows = ''
     seq = SequenceMatcher(isjunk=None,
                           a=first_id_lines,
@@ -272,7 +272,7 @@ def get_chbars(file1, file2):
 
 
 def get_iddiff(file1, file2, context_lines=None, table_only=False,
-               wdiff=False, chbars=False, skip_whitespace=False):
+               hwdiff=False, chbars=False, skip_whitespace=False):
     '''Return iddiff output'''
 
     title = 'Diff: {file1} - {file2}'.format(
@@ -281,13 +281,13 @@ def get_iddiff(file1, file2, context_lines=None, table_only=False,
 
     if chbars:
         output = get_chbars(file1, file2)
-    elif wdiff:
+    elif hwdiff:
         with open(file1, 'r') as file:
             id_a_lines = ''.join(cleanup(file.readlines(), skip_whitespace))
         with open(file2, 'r') as file:
             id_b_lines = ''.join(cleanup(file.readlines(), skip_whitespace))
 
-        output = get_wdiff(id_a_lines, id_b_lines)
+        output = get_hwdiff(id_a_lines, id_b_lines)
 
         output = HTML.format(output=output, title=title)
     else:
@@ -315,10 +315,10 @@ def parse_args(args=None):
                             action='store_true',
                             default=True,
                             help='side by side difference (default)')
-    main_group.add_argument('-w', '--wdiff',
+    main_group.add_argument('-hw', '--hwdiff',
                             action='store_true',
                             default=False,
-                            help='produce word difference')
+                            help='produce HTML wrapped word difference')
     main_group.add_argument('--chbars',
                             action='store_true',
                             default=False,
@@ -364,7 +364,7 @@ def main():
                             file2=file2,
                             context_lines=context_lines,
                             table_only=options.table_only,
-                            wdiff=options.wdiff,
+                            hwdiff=options.hwdiff,
                             chbars=options.chbars,
                             skip_whitespace=options.skip_whitespace)
         stdout.writelines(iddiff)

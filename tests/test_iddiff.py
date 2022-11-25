@@ -6,7 +6,7 @@ import sys
 
 from iddiff.iddiff import (
         add_span, cleanup, get_diff_rows, get_filename, get_html_table,
-        get_iddiff, get_wdiff, main, parse_args)
+        get_iddiff, get_hwdiff, main, parse_args)
 
 HEADERS_AND_FOOTERS = """
 Crocker                                                        [Page 5]
@@ -123,7 +123,7 @@ class TestIddiff(TestCase):
         self.assertNotIn(LINES_A[0], output)
         self.assertNotIn(LINES_A[1], output)
 
-    def test_get_wdiff(self):
+    def test_get_hwdiff(self):
         lines_a = ''.join(LINES_A)
         lines_b = ''.join([
             'Lorem ipsum dolor sit amet, consectetur adipiscing elit,',
@@ -131,7 +131,7 @@ class TestIddiff(TestCase):
             'aliqua. Ut enim add minim veniam, quis nostrud exercitation',
             'ullamco laboris nisi ut aliquip ex ea commodo consequat.'])
 
-        output = get_wdiff(lines_a, lines_b)
+        output = get_hwdiff(lines_a, lines_b)
 
         self.assertIn(LINES_A[0], output)
         self.assertIn('<span class="w-delete">', output)
@@ -194,8 +194,8 @@ class TestIddiff(TestCase):
         self.assertIn('>Skipping<', output)
         self.assertTrue(output.strip().endswith('</html>'))
 
-    def test_wdiff(self):
-        output = get_iddiff(FILE_1, FILE_2, wdiff=True)
+    def test_hwdiff(self):
+        output = get_iddiff(FILE_1, FILE_2, hwdiff=True)
 
         self.assertIn('<html', output)
         self.assertIn('<pre', output)
