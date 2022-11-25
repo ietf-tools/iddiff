@@ -45,6 +45,7 @@ jobs:
 
       - name: Generate report
         run: |
+          sudo apt-get install -y wdiff
           pip install -r requirements.dev.txt
           coverage run -m unittest discover tests
 
@@ -106,6 +107,7 @@ jobs:
 
     - name: Install dependencies
       run: |
+        sudo apt-get install -y wdiff
         echo "Installing pip + wheel..."
         python -m pip install --upgrade pip wheel
         echo "Installing python dependencies..."
@@ -135,7 +137,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        brew install pango libffi groff
+        brew install pango libffi groff wdiff
         echo "Installing pip + wheel..."
         python -m pip install --upgrade pip wheel
         echo "Installing dependencies..."

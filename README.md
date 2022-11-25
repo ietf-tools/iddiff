@@ -12,8 +12,8 @@ pip install iddiff
 
 ## Usage
 ```
-usage: iddiff [-h] [--side-by-side | -hw | --chbars] [-t] [-c CONTEXT_LINES]
-              [-s] [--version]
+usage: iddiff [-h] [--side-by-side | -w | -hw | --chbars]
+              [-t] [-c CONTEXT_LINES] [-s] [--version]
               file1 file2
 
 Internet-Draft diff tool
@@ -25,6 +25,7 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   --side-by-side        side by side difference (default)
+  -w, --wdiff           produce word difference (requries GNU Wdiff)
   -hw, --hwdiff         produce HTML wrapped word difference
   --chbars              produce changebar marked output
   -s, --skip-whitespace

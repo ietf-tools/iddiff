@@ -268,3 +268,9 @@ class TestIddiff(TestCase):
 
         self.assertIn(' Network Working Group ', output)
         self.assertIn('|Internet-Draft ', output)
+
+    def test_wdiff(self):
+        output = get_iddiff(FILE_1, FILE_2, wdiff=True)
+
+        self.assertIn('[-19 June-]', output)
+        self.assertIn('{+1 November+}', output)
