@@ -262,3 +262,9 @@ class TestIddiff(TestCase):
 
         for path in PATH_INPUTS:
             self.assertEqual(get_filename(path), 'foobar.txt')
+
+    def test_chbars(self):
+        output = get_iddiff(FILE_1, FILE_2, chbars=True)
+
+        self.assertIn(' Network Working Group ', output)
+        self.assertIn('|Internet-Draft ', output)

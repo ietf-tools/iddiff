@@ -3,6 +3,7 @@ from difflib import _mdiff as mdiff, SequenceMatcher
 from html import escape
 from pathlib import Path
 from re import compile
+from subprocess import Popen, PIPE
 from string import whitespace
 from sys import exit, stderr, stdout
 
@@ -250,15 +251,37 @@ def get_html_table(filename1, filename2, rows):
                         rows=rows)
 
 
+def get_chbars(file1, file2):
+    '''Return change bars output'''
+    diff = ['diff', '-B', '-w', '-d', '-U', '10000', file1, file2]
+    grep = ['grep', '-v', '^-']
+    tail = ['tail', '-n', '+3']
+    sed = ['sed', 's/^+/|/']
+    with Popen(args=diff,
+               stdout=PIPE) as diff_results:
+        with Popen(args=grep,
+                   stdin=diff_results.stdout,
+                   stdout=PIPE) as grep_results:
+            with Popen(args=tail,
+                       stdin=grep_results.stdout,
+                       stdout=PIPE) as tail_results:
+                with Popen(args=sed,
+                           stdin=tail_results.stdout,
+                           stdout=PIPE) as sed_results:
+                    return sed_results.communicate()[0].decode('utf-8')
+
+
 def get_iddiff(file1, file2, context_lines=None, table_only=False,
-               wdiff=False, skip_whitespace=False):
+               wdiff=False, chbars=False, skip_whitespace=False):
     '''Return iddiff output'''
 
     title = 'Diff: {file1} - {file2}'.format(
                                         file1=get_filename(file1),
                                         file2=get_filename(file2))
 
-    if wdiff:
+    if chbars:
+        output = get_chbars(file1, file2)
+    elif wdiff:
         with open(file1, 'r') as file:
             id_a_lines = ''.join(cleanup(file.readlines(), skip_whitespace))
         with open(file2, 'r') as file:
@@ -296,6 +319,10 @@ def parse_args(args=None):
                             action='store_true',
                             default=False,
                             help='produce word difference')
+    main_group.add_argument('--chbars',
+                            action='store_true',
+                            default=False,
+                            help='produce changebar marked output')
 
     group = parser.add_argument_group('side by side options')
     group.add_argument('-t', '--table-only',
@@ -338,6 +365,7 @@ def main():
                             context_lines=context_lines,
                             table_only=options.table_only,
                             wdiff=options.wdiff,
+                            chbars=options.chbars,
                             skip_whitespace=options.skip_whitespace)
         stdout.writelines(iddiff)
     except FileNotFoundError as e:
