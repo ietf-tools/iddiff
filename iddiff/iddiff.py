@@ -9,6 +9,9 @@ from sys import exit, stderr, stdout
 
 VERSION = '0.3.0'
 
+WDIFF_ERROR = 'wdiff functionlity requires GNU Wdiff ' \
+              '(https://www.gnu.org/software/wdiff/)\n'
+
 SKIPS = [
     compile(r'^.*\[?[Pp]age [0-9ivx]+\]?[ \t\f]*$'),
     compile(r'^ *Internet.Draft.+[12][0-9][0-9][0-9] *$'),
@@ -251,6 +254,13 @@ def get_html_table(filename1, filename2, rows):
                         rows=rows)
 
 
+def get_wdiff(file1, file2):
+    '''Return wdiff output'''
+    wdiff = ['wdiff', file1, file2]
+    with Popen(args=wdiff, stdout=PIPE) as results:
+        return results.communicate()[0].decode('utf-8')
+
+
 def get_chbars(file1, file2):
     '''Return change bars output'''
     diff = ['diff', '-B', '-w', '-d', '-U', '10000', file1, file2]
@@ -272,7 +282,7 @@ def get_chbars(file1, file2):
 
 
 def get_iddiff(file1, file2, context_lines=None, table_only=False,
-               hwdiff=False, chbars=False, skip_whitespace=False):
+               wdiff=False, hwdiff=False, chbars=False, skip_whitespace=False):
     '''Return iddiff output'''
 
     title = 'Diff: {file1} - {file2}'.format(
@@ -281,6 +291,8 @@ def get_iddiff(file1, file2, context_lines=None, table_only=False,
 
     if chbars:
         output = get_chbars(file1, file2)
+    elif wdiff:
+        output = get_wdiff(file1, file2)
     elif hwdiff:
         with open(file1, 'r') as file:
             id_a_lines = ''.join(cleanup(file.readlines(), skip_whitespace))
@@ -315,6 +327,10 @@ def parse_args(args=None):
                             action='store_true',
                             default=True,
                             help='side by side difference (default)')
+    main_group.add_argument('-w', '--wdiff',
+                            action='store_true',
+                            default=False,
+                            help='produce word difference (requries GNU Wdiff')
     main_group.add_argument('-hw', '--hwdiff',
                             action='store_true',
                             default=False,
@@ -364,14 +380,18 @@ def main():
                             file2=file2,
                             context_lines=context_lines,
                             table_only=options.table_only,
+                            wdiff=options.wdiff,
                             hwdiff=options.hwdiff,
                             chbars=options.chbars,
                             skip_whitespace=options.skip_whitespace)
         stdout.writelines(iddiff)
     except FileNotFoundError as e:
-        stderr.write('iddiff: {}.\n'.format(e))
+        if e.filename == 'wdiff':
+            stderr.write(WDIFF_ERROR)  # pragma: no cover
+        else:
+            stderr.write('iddiff: {}.\n'.format(e))
         exit(2)
 
 
 if __name__ == '__main__':
-    main()
+    main()  # pragma: no cover

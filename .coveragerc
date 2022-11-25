@@ -4,5 +4,3 @@ omit = tests/*
 
 [report]
 show_missing = true
-exclude_lines =
-    if __name__ == .__main__.:
