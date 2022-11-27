@@ -1,11 +1,12 @@
 from argparse import ArgumentParser
-from difflib import _mdiff as mdiff, SequenceMatcher
+from difflib import _mdiff as mdiff
 from html import escape
 from pathlib import Path
 from re import compile
 from subprocess import Popen, PIPE
 from string import whitespace
 from sys import exit, stderr, stdout
+from tempfile import NamedTemporaryFile
 
 VERSION = '0.3.0'
 
@@ -199,31 +200,6 @@ def add_span(line, css_class):
                     replace('\1', '</span>')
 
 
-def get_hwdiff(first_id_lines, second_id_lines):
-    '''Return hwdiff'''
-    rows = ''
-    seq = SequenceMatcher(isjunk=None,
-                          a=first_id_lines,
-                          b=second_id_lines)
-    for tag, f1, f2, s1, s2 in seq.get_opcodes():
-        if tag == 'equal':
-            rows += escape(first_id_lines[f1:f2])
-        elif tag == 'delete':
-            rows += '<span class="w-delete">{}</span>'.format(
-                        escape(first_id_lines[f1:f2]))
-        elif tag == 'replace':
-            rows += '<span class="w-delete">{}</span>'.format(
-                        escape(first_id_lines[f1:f2]))
-            rows += '<span class="w-insert">{}</span>'.format(
-                        escape(second_id_lines[s1:s2]))
-        elif tag == 'insert':
-            rows += '<span class="w-insert">{}</span>'.format(
-                        escape(second_id_lines[s1:s2]))
-    output = '<pre>{}</pre>'.format(rows)
-
-    return output
-
-
 def get_diff_rows(first_id_lines, second_id_lines, context):
     '''Retuns diff rows'''
     rows = ''
@@ -261,6 +237,14 @@ def get_wdiff(file1, file2):
         return results.communicate()[0].decode('utf-8')
 
 
+def get_hwdiff(file1, file2):
+    '''Return hwdiff output'''
+    wdiff = ['wdiff', '-w', '<span class="w-delete">', '-x', '</span>', '-y',
+             '<span class="w-insert">', '-z', '</span>', file1, file2]
+    with Popen(args=wdiff, stdout=PIPE) as results:
+        return results.communicate()[0].decode('utf-8')
+
+
 def get_chbars(file1, file2):
     '''Return change bars output'''
     diff = ['diff', '-B', '-w', '-d', '-U', '10000', file1, file2]
@@ -288,19 +272,24 @@ def get_iddiff(file1, file2, context_lines=None, table_only=False,
     title = 'Diff: {file1} - {file2}'.format(
                                         file1=get_filename(file1),
                                         file2=get_filename(file2))
+    tempfile1 = NamedTemporaryFile()
+    tempfile2 = NamedTemporaryFile()
+    with open(file1, 'r') as file:
+        id_a_lines = cleanup(file.readlines(), skip_whitespace)
+        tempfile1.write(escape(''.join(id_a_lines)).encode('utf-8'))
+        tempfile1.seek(0)
+    with open(file2, 'r') as file:
+        id_b_lines = cleanup(file.readlines(), skip_whitespace)
+        tempfile2.write(escape(''.join(id_b_lines)).encode('utf-8'))
+        tempfile2.seek(0)
 
     if chbars:
-        output = get_chbars(file1, file2)
+        output = get_chbars(tempfile1.name, tempfile2.name)
     elif wdiff:
-        output = get_wdiff(file1, file2)
+        output = get_wdiff(tempfile1.name, tempfile2.name)
     elif hwdiff:
-        with open(file1, 'r') as file:
-            id_a_lines = ''.join(cleanup(file.readlines(), skip_whitespace))
-        with open(file2, 'r') as file:
-            id_b_lines = ''.join(cleanup(file.readlines(), skip_whitespace))
-
-        output = get_hwdiff(id_a_lines, id_b_lines)
-
+        output = '<pre>{}</pre>'.format(
+                    get_hwdiff(tempfile1.name, tempfile2.name))
         output = HTML.format(output=output, title=title)
     else:
         with open(file1, 'r') as file:
@@ -330,11 +319,13 @@ def parse_args(args=None):
     main_group.add_argument('-w', '--wdiff',
                             action='store_true',
                             default=False,
-                            help='produce word difference (requries GNU Wdiff')
+                            help='produce word difference '
+                                 '(requries GNU Wdiff)')
     main_group.add_argument('-hw', '--hwdiff',
                             action='store_true',
                             default=False,
-                            help='produce HTML wrapped word difference')
+                            help='produce HTML wrapped word difference '
+                                 '(requires GNU Wdiff)')
     main_group.add_argument('--chbars',
                             action='store_true',
                             default=False,

@@ -68,8 +68,9 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Install HTML validator
-        run:
+      - name: Install HTML validator & other dependencies
+        run: |
+          sudo apt-get install -y wdiff
           npm install html-validate
 
       - name: Download two drafts

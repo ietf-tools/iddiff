@@ -6,7 +6,7 @@ import sys
 
 from iddiff.iddiff import (
         add_span, cleanup, get_diff_rows, get_filename, get_html_table,
-        get_iddiff, get_hwdiff, main, parse_args)
+        get_iddiff, main, parse_args)
 
 HEADERS_AND_FOOTERS = """
 Crocker                                                        [Page 5]
@@ -122,20 +122,6 @@ class TestIddiff(TestCase):
         self.assertIn('Skipping', output)
         self.assertNotIn(LINES_A[0], output)
         self.assertNotIn(LINES_A[1], output)
-
-    def test_get_hwdiff(self):
-        lines_a = ''.join(LINES_A)
-        lines_b = ''.join([
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit,',
-            'sed do eiusmod incididunt ut labore et dolore magna',
-            'aliqua. Ut enim add minim veniam, quis nostrud exercitation',
-            'ullamco laboris nisi ut aliquip ex ea commodo consequat.'])
-
-        output = get_hwdiff(lines_a, lines_b)
-
-        self.assertIn(LINES_A[0], output)
-        self.assertIn('<span class="w-delete">', output)
-        self.assertIn('<span class="w-insert">', output)
 
     def test_get_html_table(self):
         rows = get_diff_rows(LINES_A, LINES_B, context=None)
@@ -267,10 +253,10 @@ class TestIddiff(TestCase):
         output = get_iddiff(FILE_1, FILE_2, chbars=True)
 
         self.assertIn(' Network Working Group ', output)
-        self.assertIn('|Internet-Draft ', output)
+        self.assertIn('|Expires: ', output)
 
     def test_wdiff(self):
         output = get_iddiff(FILE_1, FILE_2, wdiff=True)
 
-        self.assertIn('[-19 June-]', output)
-        self.assertIn('{+1 November+}', output)
+        self.assertIn('[-21 December 2021-]', output)
+        self.assertIn('{+5 May 2022+}', output)
