@@ -245,9 +245,60 @@ def get_hwdiff(file1, file2):
         return results.communicate()[0].decode('utf-8')
 
 
+def get_abdiff(file1, file2):
+    '''Return before/after output'''
+    diff = ['diff', '-d', '-U', '10000', file1, file2]
+    result = ''
+    section = 'HEADER'
+    paragraph = 0
+    old_para = ''
+    new_para = ''
+    updated = False
+    section_re = [
+                    compile(r'^\s\d+\..*(\w\s?)+$'),
+                    compile(r'^\s(\w\s?)+$'),
+                 ]
+    newline_re = compile(r'^\s*$')
+    with Popen(args=diff, stdout=PIPE) as results:
+        diff_results = results.communicate()[0].decode('utf-8')
+        for line in diff_results.split('\n')[3:]:
+            if line.startswith('-'):
+                old_para += '{}\n'.format(line[1:])
+                updated = True
+            elif line.startswith('+'):
+                new_para += '{}\n'.format(line[1:])
+                updated = True
+            elif newline_re.match(line):
+                if updated and (len(old_para) > 0 or len(new_para) > 0):
+                    result += '\n{}, Paragrah: {}\n'.format(section, paragraph)
+                    result += 'OLD:\n'
+                    if len(old_para.strip()) > 0:
+                        result += old_para
+                    result += '\nNEW:\n'
+                    if len(new_para.strip()) > 0:
+                        result += new_para
+                paragraph += 1
+                old_para = ''
+                new_para = ''
+                updated = False
+            else:
+                for regex in section_re:
+                    if regex.match(line):
+                        section = line[1:]
+                        old_para = ''
+                        new_para = ''
+                        paragraph = 0
+                        updated = False
+                else:
+                    old_para += '{}\n'.format(line[1:])
+                    new_para += '{}\n'.format(line[1:])
+
+        return result
+
+
 def get_chbars(file1, file2):
     '''Return change bars output'''
-    diff = ['diff', '-B', '-w', '-d', '-U', '10000', file1, file2]
+    diff = ['diff', '-B', '-d', '-U', '10000', file1, file2]
     grep = ['grep', '-v', '^-']
     tail = ['tail', '-n', '+3']
     sed = ['sed', 's/^+/|/']
@@ -266,7 +317,8 @@ def get_chbars(file1, file2):
 
 
 def get_iddiff(file1, file2, context_lines=None, table_only=False,
-               wdiff=False, hwdiff=False, chbars=False, skip_whitespace=False):
+               wdiff=False, hwdiff=False, chbars=False, abdiff=False,
+               skip_whitespace=False):
     '''Return iddiff output'''
 
     title = 'Diff: {file1} - {file2}'.format(
@@ -276,11 +328,17 @@ def get_iddiff(file1, file2, context_lines=None, table_only=False,
     tempfile2 = NamedTemporaryFile()
     with open(file1, 'r') as file:
         id_a_lines = cleanup(file.readlines(), skip_whitespace)
-        tempfile1.write(escape(''.join(id_a_lines)).encode('utf-8'))
+        if wdiff or chbars or abdiff:
+            tempfile1.write(''.join(id_a_lines).encode('utf-8'))
+        else:
+            tempfile1.write(escape(''.join(id_a_lines)).encode('utf-8'))
         tempfile1.seek(0)
     with open(file2, 'r') as file:
         id_b_lines = cleanup(file.readlines(), skip_whitespace)
-        tempfile2.write(escape(''.join(id_b_lines)).encode('utf-8'))
+        if wdiff or chbars or abdiff:
+            tempfile2.write(''.join(id_b_lines).encode('utf-8'))
+        else:
+            tempfile2.write(escape(''.join(id_b_lines)).encode('utf-8'))
         tempfile2.seek(0)
 
     if chbars:
@@ -291,6 +349,8 @@ def get_iddiff(file1, file2, context_lines=None, table_only=False,
         output = '<pre>{}</pre>'.format(
                     get_hwdiff(tempfile1.name, tempfile2.name))
         output = HTML.format(output=output, title=title)
+    elif abdiff:
+        output = get_abdiff(tempfile1.name, tempfile2.name)
     else:
         with open(file1, 'r') as file:
             id_a_lines = cleanup(file.readlines(), skip_whitespace)
@@ -330,6 +390,10 @@ def parse_args(args=None):
                             action='store_true',
                             default=False,
                             help='produce changebar marked output')
+    main_group.add_argument('-ab', '--abdiff',
+                            action='store_true',
+                            default=False,
+                            help='produce before/after output')
 
     group = parser.add_argument_group('side by side options')
     group.add_argument('-t', '--table-only',
@@ -374,6 +438,7 @@ def main():
                             wdiff=options.wdiff,
                             hwdiff=options.hwdiff,
                             chbars=options.chbars,
+                            abdiff=options.abdiff,
                             skip_whitespace=options.skip_whitespace)
         stdout.writelines(iddiff)
     except FileNotFoundError as e:
