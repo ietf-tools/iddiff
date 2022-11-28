@@ -26,7 +26,7 @@ optional arguments:
   -h, --help            show this help message and exit
   --side-by-side        side by side difference (default)
   -w, --wdiff           produce word difference (requries GNU Wdiff)
-  -hw, --hwdiff         produce HTML wrapped word difference
+  -hw, --hwdiff         produce HTML wrapped word difference (requires GNU Wdiff)
   --chbars              produce changebar marked output
   -s, --skip-whitespace
                         skip multilines with only whitespace

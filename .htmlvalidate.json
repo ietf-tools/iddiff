@@ -3,6 +3,7 @@
     "html-validate:recommended"
   ],
   "rules": {
-    "long-title": "off"
+    "long-title": "off",
+    "no-trailing-whitespace": "off"
   }
 }
