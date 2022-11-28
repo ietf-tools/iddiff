@@ -12,7 +12,7 @@ pip install iddiff
 
 ## Usage
 ```
-usage: iddiff [-h] [--side-by-side | -w | -hw | --chbars]
+usage: iddiff [-h] [--side-by-side | -w | -hw | --chbars | -ab]
               [-t] [-c CONTEXT_LINES] [-s] [--version]
               file1 file2
 
@@ -28,6 +28,7 @@ optional arguments:
   -w, --wdiff           produce word difference (requries GNU Wdiff)
   -hw, --hwdiff         produce HTML wrapped word difference (requires GNU Wdiff)
   --chbars              produce changebar marked output
+  -ab, --abdiff         produce before/after output
   -s, --skip-whitespace
                         skip multilines with only whitespace
   --version             show program's version number and exit

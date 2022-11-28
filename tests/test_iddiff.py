@@ -260,3 +260,9 @@ class TestIddiff(TestCase):
 
         self.assertIn('[-21 December 2021-]', output)
         self.assertIn('{+5 May 2022+}', output)
+
+    def test_abdiff(self):
+        output = get_iddiff(FILE_1, FILE_2, abdiff=True)
+
+        self.assertIn('NEW:', output)
+        self.assertIn('OLD:', output)
