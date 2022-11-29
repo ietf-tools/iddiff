@@ -8,7 +8,7 @@ from string import whitespace
 from sys import exit, stderr, stdout
 from tempfile import NamedTemporaryFile
 
-VERSION = '0.3.0'
+VERSION = '0.4.0'
 
 WDIFF_ERROR = 'wdiff functionlity requires GNU Wdiff ' \
               '(https://www.gnu.org/software/wdiff/)\n'
