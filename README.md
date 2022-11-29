@@ -10,6 +10,10 @@ NOTE: Tested with Python 3.8.
 pip install iddiff
 ```
 
+## Dependencies
+
+Word difference functionality (`wdiff` and `hwdiff`) requires [GNU Wdiff](https://www.gnu.org/software/wdiff/).
+
 ## Usage
 ```
 usage: iddiff [-h] [--side-by-side | --wdiff | --hwdiff | --chbars | --abdiff]
