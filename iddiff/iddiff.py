@@ -352,10 +352,10 @@ def get_iddiff(file1, file2, context_lines=None, table_only=False,
     elif abdiff:
         output = get_abdiff(tempfile1.name, tempfile2.name)
     else:
-        with open(file1, 'r') as file:
-            id_a_lines = cleanup(file.readlines(), skip_whitespace)
-        with open(file2, 'r') as file:
-            id_b_lines = cleanup(file.readlines(), skip_whitespace)
+        with open(tempfile1.name, 'r') as file:
+            id_a_lines = file.readlines()
+        with open(tempfile2.name, 'r') as file:
+            id_b_lines = file.readlines()
 
         rows = get_diff_rows(id_a_lines, id_b_lines, context_lines)
 
