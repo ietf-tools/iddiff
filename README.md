@@ -4,15 +4,14 @@ Internet-Draft (ID) diff tool. Inspired by
 
 ## Install
 
-NOTE: Tested with Python 3.8.
-
 ```
 pip install iddiff
 ```
 
 ## Dependencies
 
-Word difference functionality (`wdiff` and `hwdiff`) requires [GNU Wdiff](https://www.gnu.org/software/wdiff/).
+* Python 3.8 or higher.
+* Word difference functionality (`wdiff` and `hwdiff`) requires [GNU Wdiff](https://www.gnu.org/software/wdiff/).
 
 ## Usage
 ```
