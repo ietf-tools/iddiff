@@ -376,12 +376,12 @@ def parse_args(args=None):
                             action='store_true',
                             default=True,
                             help='side by side difference (default)')
-    main_group.add_argument('-w', '--wdiff',
+    main_group.add_argument('--wdiff',
                             action='store_true',
                             default=False,
                             help='produce word difference '
                                  '(requries GNU Wdiff)')
-    main_group.add_argument('-hw', '--hwdiff',
+    main_group.add_argument('--hwdiff',
                             action='store_true',
                             default=False,
                             help='produce HTML wrapped word difference '
@@ -390,7 +390,7 @@ def parse_args(args=None):
                             action='store_true',
                             default=False,
                             help='produce changebar marked output')
-    main_group.add_argument('-ab', '--abdiff',
+    main_group.add_argument('--abdiff',
                             action='store_true',
                             default=False,
                             help='produce before/after output')
@@ -410,7 +410,7 @@ def parse_args(args=None):
                         action='store_true',
                         default=False,
                         help='skip multilines with only whitespace')
-    parser.add_argument('--version',
+    parser.add_argument('-v', '--version',
                         action='version',
                         version='iddiff {}'.format(VERSION))
 

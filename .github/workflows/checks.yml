@@ -81,7 +81,7 @@ jobs:
       - name: Generate HTML outputs
         run: |
           python iddiff/iddiff.py draft-iab-xml2rfcv2-01.txt draft-iab-xml2rfcv2-02.txt > iddiff.html
-          python iddiff/iddiff.py -hw draft-iab-xml2rfcv2-01.txt draft-iab-xml2rfcv2-02.txt > hwdiff.html
+          python iddiff/iddiff.py --hwdiff draft-iab-xml2rfcv2-01.txt draft-iab-xml2rfcv2-02.txt > hwdiff.html
 
       - name: Validate iddiff HTML output
         run: npm exec html-validate iddiff.html
