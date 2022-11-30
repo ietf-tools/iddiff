@@ -193,7 +193,7 @@ def add_span(line, css_class):
     if len(stripped_line) == 0:
         return ''
     else:
-        return escape(line). \
+        return line. \
                     replace('\0+', '<span class="{}">'.format(css_class)). \
                     replace('\0-', '<span class="{}">'.format(css_class)). \
                     replace('\0^', '<span class="{}">'.format(css_class)). \
@@ -211,8 +211,8 @@ def get_diff_rows(first_id_lines, second_id_lines, context):
             contexts += 1
         elif not different:
             rows += UNCHANGED_ROW.format(
-                                    lline=escape(lb[1]),
-                                    rline=escape(rb[1]))
+                                    lline=lb[1],
+                                    rline=rb[1])
         else:
             lline = add_span(lb[1], 'delete')
             rline = add_span(rb[1], 'insert')
