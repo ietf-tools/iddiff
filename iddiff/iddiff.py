@@ -270,7 +270,9 @@ def get_abdiff(file1, file2):
                 updated = True
             elif newline_re.match(line):
                 if updated and (len(old_para) > 0 or len(new_para) > 0):
-                    result += '\n{}, Paragrah: {}\n'.format(section, paragraph)
+                    result += '\n{section}, Paragraph: {paragraph}\n'.format(
+                                section=section,
+                                paragraph=paragraph)
                     result += 'OLD:\n'
                     if len(old_para.strip()) > 0:
                         result += old_para
