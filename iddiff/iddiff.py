@@ -176,14 +176,27 @@ def cleanup(lines, skip_whitespace):
                 id_lines.append(line.strip(WHITESPACE))
                 previous_blank = True
     else:
+        keep = True
         for line in lines:
-            keep = True
+            if not keep:
+                # ignore newlines after a page break
+                if len(line.strip()) == 0:
+                    continue
+                else:
+                    keep = True
             for skip in SKIPS:
                 if skip.match(line):
                     keep = False
                     break
             if keep:
                 id_lines.append(line)
+            else:
+                # ignore new lines before a page break
+                for _ in range(0, len(id_lines)):
+                    last = id_lines.pop()
+                    if len(last.strip()) > 0:
+                        id_lines.append(last)
+                        break
     return id_lines
 
 
@@ -216,8 +229,7 @@ def get_diff_rows(first_id_lines, second_id_lines, context):
         else:
             lline = add_span(lb[1], 'delete')
             rline = add_span(rb[1], 'insert')
-            if len(lline) > 0 or len(rline) > 0:
-                rows += CHANGED_ROW.format(lline=lline, rline=rline)
+            rows += CHANGED_ROW.format(lline=lline, rline=rline)
     rows.replace('\t', '&nbsp;')
 
     return rows
