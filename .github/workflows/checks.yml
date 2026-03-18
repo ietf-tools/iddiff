@@ -18,30 +18,30 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v6
 
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v2
+      uses: github/codeql-action/init@v4
       with:
         languages: python
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v2
+      uses: github/codeql-action/analyze@v4
 
   coverage:
     name: CodeCov
     runs-on: ubuntu-latest
     env:
       OS: ubuntu-latest
-      PYTHON: '3.9'
+      PYTHON: '3.11'
 
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v6
 
       - name: Setup Python
-        uses: actions/setup-python@master
+        uses: actions/setup-python@v6.2.0
         with:
-          python-version: 3.9
+          python-version: 3.11
 
       - name: Generate report
         run: |
@@ -50,7 +50,7 @@ jobs:
           coverage run -m unittest discover tests
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v5.5.2
         with:
           flags: unittests
           fail_ci_if_error: true
@@ -61,12 +61,12 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
 
       - name: Setup Python
-        uses: actions/setup-python@master
+        uses: actions/setup-python@v6.2.0
         with:
-          python-version: 3.9
+          python-version: 3.11
 
       - name: Install HTML validator & other dependencies
         run: |
@@ -90,19 +90,19 @@ jobs:
         run: npm exec html-validate hwdiff.html
 
   tests-linux:
-    name: Unit Tests (Linux)
+   name: Unit Tests (Linux)
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        python-version: ['3.8', '3.9', '3.10']
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13', '3.14']
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v6
 
     - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2.3.1
+      uses: actions/setup-python@v6.2.0
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -125,14 +125,14 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ['3.8', '3.9', '3.10']
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13', '3.14']
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v6
 
     - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2.3.1
+      uses: actions/setup-python@v6.2.0
       with:
         python-version: ${{ matrix.python-version }}
 
