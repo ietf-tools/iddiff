@@ -46,7 +46,7 @@ jobs:
       - name: Generate report
         run: |
           sudo apt-get install -y wdiff
-          pip install -r requirements.dev.txt
+          pip install .[test]
           coverage run -m unittest discover tests
 
       - name: Upload coverage to Codecov
@@ -90,7 +90,7 @@ jobs:
         run: npm exec html-validate hwdiff.html
 
   tests-linux:
-   name: Unit Tests (Linux)
+    name: Unit Tests (Linux)
     runs-on: ubuntu-latest
 
     strategy:
@@ -112,7 +112,7 @@ jobs:
         echo "Installing pip + wheel..."
         python -m pip install --upgrade pip wheel
         echo "Installing python dependencies..."
-        python -m pip install -r requirements.dev.txt tox-gh-actions
+        python -m pip install .[test] tox tox-gh-actions
 
     - name: Test with tox
       env:
@@ -142,7 +142,7 @@ jobs:
         echo "Installing pip + wheel..."
         python -m pip install --upgrade pip wheel
         echo "Installing dependencies..."
-        python -m pip install -r requirements.dev.txt tox-gh-actions
+        python -m pip install .[test] tox tox-gh-actions
 
     - name: Test with tox
       env:

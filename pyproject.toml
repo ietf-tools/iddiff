@@ -1,3 +1,46 @@
 [build-system]
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "iddiff"
+version = "0.4.3"
+authors = [
+  {name = "Kesara Nanayakkara Rathnayake", email = "kesara@fq.nz"},
+]
+description = "Internet-Draft diff tool"
+keywords = ["ietf", "rfc", "id", "internet-draft", "diff"]
+readme = "README.md"
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
+requires-python = ">=3.9"
+classifiers = [
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13',
+    'Programming Language :: Python :: 3.14',
+]
+dependencies = []
+
+[project.urls]
+homepage = "https://github.com/ietf-tools/iddiff"
+source = "https://github.com/ietf-tools/iddiff"
+issues = "https://github.com/ietf-tools/iddiff/issues"
+releasenotes = "https://github.com/ietf-tools/iddiff/releases"
+
+[project.optional-dependencies]
+test = [
+        "coverage",
+        "pycodestyle",
+        "pyflakes",
+        "tox",
+]
+
+[project.scripts]
+iddiff = "iddiff.iddiff:main"
+
+[tool.setuptools]
+packages = ["iddiff"]
+
