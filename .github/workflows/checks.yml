@@ -50,10 +50,12 @@ jobs:
           coverage run -m unittest discover tests
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5.5.2
+        uses: codecov/codecov-action@v5
         with:
           flags: unittests
           fail_ci_if_error: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   validate-html-output:
     name: Validate HTML output
