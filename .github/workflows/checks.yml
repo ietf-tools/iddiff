@@ -74,6 +74,8 @@ jobs:
         run: |
           sudo apt-get install -y wdiff
           npm install html-validate
+          python -m pip install --upgrade pip wheel
+          python -m pip install .
 
       - name: Download two drafts
         run: |
@@ -82,8 +84,8 @@ jobs:
 
       - name: Generate HTML outputs
         run: |
-          python iddiff/iddiff.py draft-iab-xml2rfcv2-01.txt draft-iab-xml2rfcv2-02.txt > iddiff.html
-          python iddiff/iddiff.py --hwdiff draft-iab-xml2rfcv2-01.txt draft-iab-xml2rfcv2-02.txt > hwdiff.html
+          iddiff draft-iab-xml2rfcv2-01.txt draft-iab-xml2rfcv2-02.txt > iddiff.html
+          iddiff --hwdiff draft-iab-xml2rfcv2-01.txt draft-iab-xml2rfcv2-02.txt > hwdiff.html
 
       - name: Validate iddiff HTML output
         run: npm exec html-validate iddiff.html
