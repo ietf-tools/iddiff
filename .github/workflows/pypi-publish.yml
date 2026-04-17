@@ -65,9 +65,9 @@ jobs:
           echo "PKG_VERSION=$GITHUB_REF_NAME" >> $GITHUB_ENV
           echo "PKG_VERSION_STRICT=${GITHUB_REF_NAME#?}" >> $GITHUB_ENV
         else
-          echo "Using TEST mode: v3.0.0-dev$GITHUB_RUN_NUMBER"
-          echo "PKG_VERSION=v3.0.0-dev$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
-          echo "PKG_VERSION_STRICT=3.0.0-dev$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
+          echo "Using TEST mode: v3.0.0-dev.$GITHUB_RUN_NUMBER"
+          echo "PKG_VERSION=v3.0.0-dev.$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
+          echo "PKG_VERSION_STRICT=3.0.0-dev.$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
         fi
 
     - name: Install pypa/build
@@ -81,7 +81,7 @@ jobs:
     - name: Build a binary wheel and a source tarball
       run: |
         echo "Using version $PKG_VERSION_STRICT"
-        sed -i -r -e 's/^version += ".*"$/version = "$PKG_VERSION_STRICT"/' pyproject.toml
+        sed -i -r -e "s/^version += \".*\"$/version = \"$PKG_VERSION_STRICT\"/" pyproject.toml
         python3 -m build
 
     - name: Store the distribution packages
