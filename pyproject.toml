@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "iddiff"
-version = "0.4.3"
+version = "0.5.0"
 authors = [
   {name = "Kesara Nanayakkara Rathnayake", email = "kesara@fq.nz"},
 ]
