@@ -81,7 +81,7 @@ jobs:
     - name: Build a binary wheel and a source tarball
       run: |
         echo "Using version $PKG_VERSION_STRICT"
-        sed -i -r -e "s/^version += \".*\"$/version = \"$PKG_VERSION_STRICT\"/" pyproject.toml
+        sed -i -r -e "s/^__version__ += '.*'$/__version__ = '$PKG_VERSION_STRICT'/" iddiff/__init__.py
         python3 -m build
 
     - name: Store the distribution packages
@@ -90,11 +90,11 @@ jobs:
         name: python-package-distributions
         path: dist/
 
-    - name: Store updated pyproject.toml
+    - name: Store updated __init__.py
       uses: actions/upload-artifact@v4
       with:
-        name: iddiff-pyproject
-        path: pyproject.toml
+        name: iddiff-init
+        path: iddiff/__init__.py
 
   publish-to-pypi:
     name: >-
@@ -145,10 +145,11 @@ jobs:
         name: python-package-distributions
         path: dist/
 
-    - name: Download updated pyproject.toml file
+    - name: Download updated __init__.py file
       uses: actions/download-artifact@v4
       with:
-        name: iddiff-pyproject
+        name: iddiff-init
+        path: iddiff/
         merge-multiple: true
 
     - name: Set Variables

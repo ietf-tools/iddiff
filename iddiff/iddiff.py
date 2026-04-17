@@ -8,7 +8,7 @@ from string import whitespace
 from sys import exit, stderr, stdout
 from tempfile import NamedTemporaryFile
 
-VERSION = '0.4.3'
+from iddiff.__init__ import __version__
 
 WDIFF_ERROR = 'wdiff functionlity requires GNU Wdiff ' \
               '(https://www.gnu.org/software/wdiff/)\n'
@@ -426,7 +426,7 @@ def parse_args(args=None):
                         help='skip multilines with only whitespace')
     parser.add_argument('-v', '--version',
                         action='version',
-                        version='iddiff {}'.format(VERSION))
+                        version='iddiff {}'.format(__version__))
 
     parser.add_argument('file1', help='first file to compare')
     parser.add_argument('file2', help='second file to compare')

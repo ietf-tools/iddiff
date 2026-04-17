@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "iddiff"
-version = "0.4.3"
+dynamic = ["version"]
 authors = [
   {name = "Kesara Nanayakkara Rathnayake", email = "kesara@fq.nz"},
 ]
@@ -43,3 +43,5 @@ iddiff = "iddiff.iddiff:main"
 [tool.setuptools]
 packages = ["iddiff"]
 
+[tool.setuptools.dynamic]
+version = {attr = "iddiff.__version__"}
